@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Menulis Teks Deskripsi - SMP Kelas 7</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Plus+Jakarta+Sans:wght@300..800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+        }
+        .title-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Custom scrollbar for interactive board touch */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669;
+        }
+        /* Ripple effect for big touch button click visual feedback */
+        .btn-interactive {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-interactive:active {
+            transform: scale(0.92);
+        }
+        /* Confetti animation */
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10%) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            z-index: 999;
+            animation: confetti-fall 3s linear infinite;
+        }
+    </style>
+</head>
+<body class="overflow-hidden h-screen flex flex-col justify-between text-slate-800">
+
+<script>
+    // Sound FX generator using Web Audio API (safe, offline-friendly, no external asset load failures)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        if (type === 'click') {
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.12);
+        } else if (type === 'success') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+            osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3); // C6
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        } else if (type === 'fail') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+            osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        } else if (type === 'complete') {
+            osc.type = 'sine';
+            const notes = [523, 587, 659, 698, 783, 880, 987, 1046];
+            notes.forEach((note, index) => {
+                const subOsc = audioCtx.createOscillator();
+                const subGain = audioCtx.createGain();
+                subOsc.connect(subGain);
+                subGain.connect(audioCtx.destination);
+                subOsc.frequency.setValueAtTime(note, audioCtx.currentTime + (index * 0.08));
+                subGain.gain.setValueAtTime(0.1, audioCtx.currentTime + (index * 0.08));
+                subGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (index * 0.08) + 0.2);
+                subOsc.start(audioCtx.currentTime + (index * 0.08));
+                subOsc.stop(audioCtx.currentTime + (index * 0.08) + 0.25);
+            });
+        }
+    }
+</script>
+
+<!-- Header Control Bar -->
+<header class="bg-emerald-600 text-white px-6 py-3 flex justify-between items-center shadow-md shrink-0 z-30">
+    <div class="flex items-center space-x-3">
+        <div class="bg-amber-400 p-2 rounded-xl shadow-inner text-emerald-900 font-bold text-xl">
+            <i class="fa-solid fa-feather-pointed animate-bounce"></i>
+        </div>
+        <div>
+            <h1 class="title-font text-xl md:text-2xl font-bold tracking-wider">SIPETA DESKRIPSI</h1>
+            <p class="text-xs text-emerald-100 font-medium">Sistem Pembelajaran Interaktif & Petualangan Deskripsi</p>
+        </div>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+        <div id="userInfoHeader" class="hidden md:flex items-center bg-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold space-x-2 border border-emerald-500/30">
+            <i class="fa-solid fa-user-astronaut text-amber-300"></i>
+            <span id="headerName" class="text-white">Pemain</span>
+            <span class="text-emerald-300">|</span>
+            <i class="fa-solid fa-school text-emerald-300"></i>
+            <span id="headerSchool" class="text-emerald-100">Sekolah</span>
+        </div>
+        
+        <!-- Fullscreen Button for IFP Display -->
+        <button onclick="toggleFullscreen()" class="btn-interactive bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-4 py-2 rounded-xl flex items-center gap-2 text-sm shadow-md">
+            <i id="fullscreenIcon" class="fa-solid fa-expand"></i>
+            <span class="hidden sm:inline">Layar Penuh</span>
+        </button>
+    </div>
+</header>
+
+<!-- Canvas for Confetti -->
+<div id="confettiContainer" class="absolute inset-0 pointer-events-none overflow-hidden z-50"></div>
+
+<!-- MAIN VIEWPORT CONTAINER -->
+<main class="flex-grow relative overflow-hidden flex flex-col justify-center items-center p-4 md:p-6">
+
+    <!-- SCREEN 1: WELCOME & MOTIVATION SCREEN -->
+    <section id="screen-welcome" class="screen w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <!-- Pak Teguh Avatar column -->
+        <div class="md:w-2/5 flex flex-col items-center justify-center bg-emerald-50 rounded-2xl p-6 border border-emerald-100 relative">
+            <div class="absolute top-3 right-3 bg-amber-400 text-xs font-bold px-2.5 py-1 rounded-full text-slate-800 shadow">
+                SMP Kelas VII
+            </div>
+            <!-- Custom Styled Avatar of Pak Teguh using HTML/CSS & SVG -->
+            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-emerald-200 border-4 border-emerald-500 flex items-center justify-center overflow-hidden mb-4 shadow-lg">
+                <svg viewBox="0 0 100 100" class="w-full h-full text-slate-700">
+                    <circle cx="50" cy="40" r="22" fill="#ffdbac"/>
+                    <!-- Hair -->
+                    <path d="M26,38 C26,24 74,24 74,38 C74,20 26,20 26,38 Z" fill="#2d3748"/>
+                    <path d="M40,24 C45,15 55,15 60,24" fill="#2d3748" stroke="#2d3748" stroke-width="4"/>
+                    <!-- Glasses -->
+                    <circle cx="42" cy="38" r="6" fill="none" stroke="#2d3748" stroke-width="2.5"/>
+                    <circle cx="58" cy="38" r="6" fill="none" stroke="#2d3748" stroke-width="2.5"/>
+                    <line x1="48" y1="38" x2="52" y2="38" stroke="#2d3748" stroke-width="2.5"/>
+                    <!-- Smile & Cheeks -->
+                    <path d="M45,48 Q50,53 55,48" fill="none" stroke="#e53e3e" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="36" cy="45" r="3" fill="#feb2b2"/>
+                    <circle cx="64" cy="45" r="3" fill="#feb2b2"/>
+                    <!-- Teacher Shirt -->
+                    <path d="M25,80 C25,65 35,60 50,60 C65,60 75,65 75,80 L75,100 L25,100 Z" fill="#047857"/>
+                    <!-- Tie -->
+                    <path d="M47,60 L53,60 L55,75 L50,85 L45,75 Z" fill="#fbbf24"/>
+                </svg>
+            </div>
+            <h3 class="title-font text-lg font-bold text-emerald-800">Pak Teguh, S.Pd.</h3>
+            <p class="text-xs text-emerald-600 font-semibold mb-2">Guru Bahasa Indonesia Hebat</p>
+            <div class="bg-white border-2 border-emerald-200 p-4 rounded-xl text-center shadow-sm">
+                <p class="text-xs text-slate-600 italic leading-relaxed">
+                    "Halo Sobat Bahasa! Menulis teks deskripsi itu seperti melukis, tapi menggunakan kata-kata indah. Mari kita rasakan serunya berpetualang melukis dunia lewat tulisan kita!"
+                </p>
+            </div>
+        </div>
+
+        <!-- Inputs and motivation -->
+        <div class="md:w-3/5 flex flex-col justify-between">
+            <div>
+                <span class="bg-amber-400 text-amber-900 font-bold px-3 py-1 rounded-full text-xs">PENGANTAR MPI</span>
+                <h2 class="title-font text-2xl md:text-3xl font-extrabold text-emerald-700 mt-2">Mari Menjadi Pelukis Kata!</h2>
+                <p class="text-sm text-slate-600 mt-3 leading-relaxed">
+                    Selamat datang di MPI Bahasa Indonesia! Hari ini kita akan belajar <strong>mengidentifikasi struktur teks deskripsi</strong> dan langsung melatih keterampilan <strong>menulis teks deskripsi yang benar dan mengagumkan</strong>. 
+                </p>
+
+                <!-- Input Identitas Siswa -->
+                <div class="mt-6 space-y-4 bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
+                    <h4 class="text-sm font-bold text-slate-700"><i class="fa-solid fa-address-card mr-2 text-emerald-600"></i>Isi Identitas Petualang:</h4>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Lengkap Siswa</label>
+                        <input id="inputName" type="text" placeholder="Masukkan nama lengkapmu..." 
+                               class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-none transition font-semibold text-slate-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Asal Sekolah</label>
+                        <input id="inputSchool" type="text" placeholder="Masukkan asal SMP..." 
+                               class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-none transition font-semibold text-slate-700">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Area -->
+            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                <button onclick="startApp()" class="btn-interactive w-full sm:w-auto flex-grow bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl flex items-center justify-center gap-3">
+                    Mulai Belajar <i class="fa-solid fa-circle-play text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCREEN 2: MAIN DASHBOARD -->
+    <section id="screen-dashboard" class="screen hidden w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col gap-6 border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <!-- Dashboard Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-emerald-50 to-emerald-100 p-5 rounded-2xl border border-emerald-200/50">
+            <div>
+                <h2 class="title-font text-2xl font-bold text-emerald-800">Peta Belajar Bahasa Indonesia</h2>
+                <p class="text-sm text-slate-600">Selesaikan setiap rute pembelajaran di bawah ini dengan tertib!</p>
+            </div>
+            <!-- Progress Status Bar -->
+            <div class="w-full md:w-64">
+                <div class="flex justify-between text-xs font-bold text-emerald-700 mb-1">
+                    <span>Progress Petualangan</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner">
+                    <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-amber-400 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Menu Grid (Optimized for Interactive Board touch targets) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            
+            <!-- Menu 1: Tujuan & Panduan -->
+            <div onclick="showScreen('tujuan')" class="btn-interactive cursor-pointer group bg-white border-2 border-emerald-100 hover:border-emerald-400 rounded-2xl p-5 shadow-sm hover:shadow-md flex items-start gap-4 transition">
+                <div class="bg-emerald-100 text-emerald-700 p-4 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-compass text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-lg font-bold text-slate-800 group-hover:text-emerald-700">1. Tujuan & Panduan</h3>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Ketahui target belajar dan cara bermain interaktif di papan digital.</p>
+                </div>
+            </div>
+
+            <!-- Menu 2: Rangkuman Materi -->
+            <div onclick="showScreen('materi')" class="btn-interactive cursor-pointer group bg-white border-2 border-emerald-100 hover:border-emerald-400 rounded-2xl p-5 shadow-sm hover:shadow-md flex items-start gap-4 transition">
+                <div class="bg-blue-100 text-blue-700 p-4 rounded-xl group-hover:bg-blue-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-book-open text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-lg font-bold text-slate-800 group-hover:text-blue-700">2. Rangkuman Materi</h3>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Pelajari struktur teks deskripsi serta pembedah teks yang interaktif.</p>
+                </div>
+            </div>
+
+            <!-- Menu 3: Ayo Berpetualang -->
+            <div onclick="showScreen('petualangan')" class="btn-interactive cursor-pointer group bg-white border-2 border-amber-100 hover:border-amber-400 rounded-2xl p-5 shadow-sm hover:shadow-md flex items-start gap-4 transition relative overflow-hidden">
+                <div class="absolute right-0 top-0 bg-amber-400 text-[10px] font-extrabold px-3 py-1 rounded-bl-xl text-slate-800 tracking-wider">GAME UTAMA</div>
+                <div class="bg-amber-100 text-amber-700 p-4 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-map-location-dot text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-lg font-bold text-slate-800 group-hover:text-amber-700">3. Ayo Berpetualang!</h3>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Tantangan 3 Level: Hutan Struktur, Lembah Kata, & Puncak Deskripsi.</p>
+                </div>
+            </div>
+
+            <!-- Menu 4: Asesmen Sumatif -->
+            <div onclick="showScreen('asesmen')" class="btn-interactive cursor-pointer group bg-white border-2 border-purple-100 hover:border-purple-400 rounded-2xl p-5 shadow-sm hover:shadow-md flex items-start gap-4 transition">
+                <div class="bg-purple-100 text-purple-700 p-4 rounded-xl group-hover:bg-purple-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-file-pen text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-lg font-bold text-slate-800 group-hover:text-purple-700">4. Asesmen Sumatif</h3>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Tantangan proyek menulis teks deskripsi mandiri berstruktur lengkap.</p>
+                </div>
+            </div>
+
+            <!-- Menu 5: Tantangan HOTS -->
+            <div onclick="showScreen('hots')" class="btn-interactive cursor-pointer group bg-white border-2 border-red-100 hover:border-red-400 rounded-2xl p-5 shadow-sm hover:shadow-md flex items-start gap-4 transition">
+                <div class="bg-red-100 text-red-700 p-4 rounded-xl group-hover:bg-red-500 group-hover:text-white transition">
+                    <i class="fa-solid fa-brain text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="title-font text-lg font-bold text-slate-800 group-hover:text-red-700">5. Soal Tantangan HOTS</h3>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Uji nalarmu dengan menganalisis dan merevisi cerita deskripsi berantakan.</p>
+                </div>
+            </div>
+
+            <!-- Interactive Info Card -->
+            <div class="bg-emerald-600 text-white rounded-2xl p-5 flex flex-col justify-between shadow-inner">
+                <div>
+                    <h4 class="title-font font-bold text-amber-300"><i class="fa-solid fa-circle-info mr-1"></i> Tips Papan Digital:</h4>
+                    <p class="text-xs text-emerald-100 mt-2 leading-relaxed">
+                        Gunakan sentuhan yang lembut namun mantap. Ketuk tombol berulang kali atau seret elemen dengan santai. Pembelajaran seru ada di tanganmu!
+                    </p>
+                </div>
+                <div class="text-right text-xs text-emerald-300 font-mono mt-2">v2.1 Stable Interactive</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCREEN 3: TUJUAN DAN PANDUAN -->
+    <section id="screen-tujuan" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col justify-between border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <div>
+            <div class="flex justify-between items-center border-b pb-4">
+                <h2 class="title-font text-2xl font-bold text-emerald-700"><i class="fa-solid fa-compass mr-2"></i>Tujuan Pembelajaran & Panduan</h2>
+                <button onclick="showScreen('dashboard')" class="btn-interactive bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl"><i class="fa-solid fa-house"></i> Menu Utama</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <!-- Tujuan Pembelajaran -->
+                <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                    <div class="flex items-center gap-3 text-emerald-800 font-bold text-lg mb-3">
+                        <i class="fa-solid fa-bullseye text-amber-500 text-xl"></i>
+                        <h3 class="title-font">Tujuan Pembelajaran (TP)</h3>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-800 leading-relaxed bg-white p-4 rounded-xl shadow-sm border border-emerald-200">
+                        "Melalui berbagai aktivitas multimedia interaktif, peserta didik mampu mengidentifikasi struktur teks deskripsi (Identifikasi, Deskripsi Bagian, dan Kesimpulan) serta terampil menulis teks deskripsi sederhana secara benar, kohesif, dan menarik sesuai kaidah kebahasaan."
+                    </p>
+                    <ul class="text-xs text-slate-600 mt-4 space-y-2 list-disc pl-5">
+                        <li>Mengidentifikasi paragraf identifikasi dengan tepat.</li>
+                        <li>Membedakan bagian-bagian deskripsi berdasarkan pancaindra.</li>
+                        <li>Menyusun kalimat deskriptif menggunakan struktur runtut.</li>
+                    </ul>
+                </div>
+
+                <!-- Panduan Penggunaan -->
+                <div class="bg-amber-50 p-5 rounded-2xl border border-amber-100">
+                    <div class="flex items-center gap-3 text-amber-800 font-bold text-lg mb-3">
+                        <i class="fa-solid fa-circle-question text-emerald-600 text-xl"></i>
+                        <h3 class="title-font">Panduan di Layar Interaktif (IFP)</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex gap-3 bg-white p-2.5 rounded-xl border border-amber-200 shadow-sm">
+                            <span class="bg-amber-400 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0">1</span>
+                            <p class="text-xs text-slate-700 leading-normal">Membaca rangkuman materi di menu 2 untuk dasar petualangan menulis.</p>
+                        </div>
+                        <div class="flex gap-3 bg-white p-2.5 rounded-xl border border-amber-200 shadow-sm">
+                            <span class="bg-amber-400 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0">2</span>
+                            <p class="text-xs text-slate-700 leading-normal">Buka <strong>Ayo Berpetualang</strong>, selesaikan 3 level utama untuk membuka tantangan berikutnya.</p>
+                        </div>
+                        <div class="flex gap-3 bg-white p-2.5 rounded-xl border border-amber-200 shadow-sm">
+                            <span class="bg-amber-400 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0">3</span>
+                            <p class="text-xs text-slate-700 leading-normal">Gunakan keyboard visual layar sentuh atau fisik untuk mengetik jawaban pada modul Asesmen dan Tantangan HOTS.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 pt-4 border-t flex justify-end">
+            <button onclick="showScreen('materi')" class="btn-interactive bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2">
+                Lanjut ke Rangkuman Materi <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- SCREEN 4: RANGKUMAN MATERI & PEMBEDAH TEKS -->
+    <section id="screen-materi" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col justify-between border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <div>
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 class="title-font text-2xl font-bold text-emerald-700"><i class="fa-solid fa-book-open mr-2"></i>Rangkuman Materi Teks Deskripsi</h2>
+                <button onclick="showScreen('dashboard')" class="btn-interactive bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl"><i class="fa-solid fa-house"></i></button>
+            </div>
+
+            <!-- Material Tabs -->
+            <div class="flex border-b border-slate-200 mb-4 gap-2">
+                <button onclick="switchMateriTab('definisi')" id="tab-definisi" class="materi-tab px-4 py-2 font-bold text-sm text-emerald-600 border-b-2 border-emerald-500 focus:outline-none">Definisi & Struktur</button>
+                <button onclick="switchMateriTab('pembedah')" id="tab-pembedah" class="materi-tab px-4 py-2 font-bold text-sm text-slate-500 border-b-2 border-transparent hover:text-emerald-500 focus:outline-none">Pembedah Struktur Interaktif</button>
+            </div>
+
+            <!-- Tab Content 1: Definisi & Struktur -->
+            <div id="materi-definisi" class="materi-tab-content space-y-4">
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    <strong>Teks Deskripsi</strong> adalah paragraf yang melukiskan atau menggambarkan suatu objek secara jelas seolah-olah pembaca dapat melihat, mendengar, merasakan, atau mengalami sendiri objek tersebut.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                    <div class="bg-amber-50 p-4 rounded-xl border-l-4 border-amber-500">
+                        <span class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">BAGIAN 1</span>
+                        <h4 class="title-font font-bold text-slate-800 mt-1">Identifikasi</h4>
+                        <p class="text-xs text-slate-600 mt-1">Berisi penentuan identitas objek, nama objek, lokasi, sejarah lahirnya, atau gambaran umum objek yang akan dideskripsikan.</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-500">
+                        <span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">BAGIAN 2</span>
+                        <h4 class="title-font font-bold text-slate-800 mt-1">Deskripsi Bagian</h4>
+                        <p class="text-xs text-slate-600 mt-1">Berisi rincian objek berdasarkan tanggapan subjektif penulis dengan melibatkan pancaindra (visual, suara, rasa, penciuman, rabaan).</p>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-xl border-l-4 border-emerald-500">
+                        <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">BAGIAN 3</span>
+                        <h4 class="title-font font-bold text-slate-800 mt-1">Simpulan / Kesan</h4>
+                        <p class="text-xs text-slate-600 mt-1">Berisi kesan umum atau simpulan subjektif penulis terhadap keindahan atau keistimewaan objek yang dibahas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Interactive Text Slicer -->
+            <div id="materi-pembedah" class="materi-tab-content hidden space-y-4">
+                <p class="text-xs text-slate-500 italic">Petunjuk: Klik pada paragraf untuk melihat pembedahan dan penjelasan strukturnya secara interaktif di layar!</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Text blocks -->
+                    <div class="space-y-3">
+                        <div onclick="highlightStructure('identifikasi')" class="pembedah-block cursor-pointer bg-amber-50/50 hover:bg-amber-100 border-2 border-dashed border-amber-300 rounded-xl p-3 transition">
+                            <span class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">Paragraf 1</span>
+                            <p class="text-xs font-semibold text-slate-800 mt-1">"Kucing kesayanganku bernama Kiko. Ia adalah kucing persia jantan yang diberikan ayah sebagai hadiah ulang tahunku yang ke-12. Kami memeliharanya di rumah kami yang asri."</p>
+                        </div>
+                        <div onclick="highlightStructure('deskripsi')" class="pembedah-block cursor-pointer bg-blue-50/50 hover:bg-blue-100 border-2 border-dashed border-blue-300 rounded-xl p-3 transition">
+                            <span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">Paragraf 2</span>
+                            <p class="text-xs font-semibold text-slate-800 mt-1">"Kiko memiliki bulu putih bersih yang sangat lebat dan sehalus sutra. Matanya berwarna biru jernih seperti air laut, berbinar lucu setiap kali melihat mainan tikus karetnya. Telinganya kecil dan selalu bergerak lincah."</p>
+                        </div>
+                        <div onclick="highlightStructure('kesimpulan')" class="pembedah-block cursor-pointer bg-emerald-50/50 hover:bg-emerald-100 border-2 border-dashed border-emerald-300 rounded-xl p-3 transition">
+                            <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">Paragraf 3</span>
+                            <p class="text-xs font-semibold text-slate-800 mt-1">"Aku sangat bersyukur memiliki Kiko. Kehadirannya selalu membuat rumah menjadi ramai dan penuh tawa. Kiko benar-benar anggota keluarga kami yang paling menggemaskan!"</p>
+                        </div>
+                    </div>
+                    <!-- Analysis Feedback panel -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
+                        <div id="pembedahFeedbackEmpty" class="text-slate-400">
+                            <i class="fa-solid fa-wand-magic-sparkles text-4xl mb-2 animate-pulse"></i>
+                            <p class="text-xs font-semibold">Ketuk salah satu paragraf di samping kiri untuk mengaktifkan pembedah struktur teks deskripsi!</p>
+                        </div>
+                        <div id="pembedahFeedbackActive" class="hidden text-left w-full h-full flex flex-col justify-between">
+                            <div>
+                                <span id="pembedahBadge" class="px-2.5 py-1 text-xs font-extrabold rounded-full text-white inline-block">STRUKTUR</span>
+                                <h4 id="pembedahTitle" class="title-font font-bold text-slate-800 text-lg mt-3">Struktur Terpilih</h4>
+                                <p id="pembedahContent" class="text-xs text-slate-600 mt-2 leading-relaxed bg-white p-3 rounded-xl border shadow-inner">Penjelasan mendalam...</p>
+                            </div>
+                            <div class="mt-4 bg-emerald-50 p-2.5 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                <span>Hebat! Memahami letak struktur ini melatih logika menulismu!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-4 border-t flex justify-between">
+            <button onclick="showScreen('dashboard')" class="btn-interactive bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl"><i class="fa-solid fa-arrow-left"></i> Menu</button>
+            <button onclick="showScreen('petualangan')" class="btn-interactive bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg">
+                Mulai Berpetualang! <i class="fa-solid fa-map-location-dot"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- SCREEN 5: AYO BERPETUALANG MAP & SYSTEM -->
+    <section id="screen-petualangan" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col justify-between border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <div>
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 class="title-font text-2xl font-bold text-emerald-700"><i class="fa-solid fa-map-location-dot mr-2"></i>Ayo Berpetualang!</h2>
+                <button onclick="showScreen('dashboard')" class="btn-interactive bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl"><i class="fa-solid fa-house"></i></button>
+            </div>
+
+            <!-- Adventure map background layout -->
+            <div class="bg-gradient-to-b from-sky-200 via-emerald-100 to-amber-100 rounded-2xl p-6 border-2 border-emerald-300 relative min-h-[300px] flex flex-col justify-between overflow-hidden">
+                <!-- Clouds inside map -->
+                <i class="fa-solid fa-cloud text-white text-4xl opacity-50 absolute top-4 left-10 animate-pulse"></i>
+                <i class="fa-solid fa-cloud text-white text-3xl opacity-40 absolute top-12 right-20 animate-pulse"></i>
+
+                <!-- Grid map containing the three levels -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 my-auto">
+                    
+                    <!-- Level 1: Hutan Struktur -->
+                    <div id="level-card-1" class="bg-white rounded-2xl p-4 shadow-md border-2 border-emerald-500/30 flex flex-col justify-between transition transform hover:-translate-y-1">
+                        <div>
+                            <div class="flex justify-between items-center">
+                                <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">LEVEL 1</span>
+                                <span id="lvl1-stars" class="text-amber-400 text-xs font-bold"><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></span>
+                            </div>
+                            <h3 class="title-font font-bold text-slate-800 text-base mt-2">Hutan Struktur</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Kuasai konsep identifikasi, deskripsi bagian, dan simpulan.</p>
+                        </div>
+                        <div class="mt-4 flex flex-col gap-1.5">
+                            <button id="btn-challenge-1-easy" onclick="startChallenge(1, 'easy')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-emerald-500 hover:bg-emerald-600">Mudah (100 Poin)</button>
+                            <button id="btn-challenge-1-medium" onclick="startChallenge(1, 'medium')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Sedang (200 Poin)</button>
+                            <button id="btn-challenge-1-hard" onclick="startChallenge(1, 'hard')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Sulit (300 Poin)</button>
+                        </div>
+                    </div>
+
+                    <!-- Level 2: Lembah Kata Sifat -->
+                    <div id="level-card-2" class="bg-white rounded-2xl p-4 shadow-md border-2 border-slate-200 flex flex-col justify-between transition transform hover:-translate-y-1 opacity-70">
+                        <div>
+                            <div class="flex justify-between items-center">
+                                <span class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">LEVEL 2</span>
+                                <span id="lvl2-stars" class="text-amber-400 text-xs font-bold"><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></span>
+                            </div>
+                            <h3 class="title-font font-bold text-slate-800 text-base mt-2">Lembah Kata Sifat</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Latih penggunaan kata deskriptif & pancaindra.</p>
+                        </div>
+                        <div class="mt-4 flex flex-col gap-1.5">
+                            <button id="btn-challenge-2-easy" onclick="startChallenge(2, 'easy')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Mudah (100 Poin)</button>
+                            <button id="btn-challenge-2-medium" onclick="startChallenge(2, 'medium')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Sedang (200 Poin)</button>
+                            <button id="btn-challenge-2-hard" onclick="startChallenge(2, 'hard')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Sulit (300 Poin)</button>
+                        </div>
+                    </div>
+
+                    <!-- Level 3: Puncak Deskripsi -->
+                    <div id="level-card-3" class="bg-white rounded-2xl p-4 shadow-md border-2 border-slate-200 flex flex-col justify-between transition transform hover:-translate-y-1 opacity-70">
+                        <div>
+                            <div class="flex justify-between items-center">
+                                <span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">LEVEL 3</span>
+                                <span id="lvl3-stars" class="text-amber-400 text-xs font-bold"><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></span>
+                            </div>
+                            <h3 class="title-font font-bold text-slate-800 text-base mt-2">Puncak Deskripsi</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">Menyusun paragraf deskripsi yang utuh.</p>
+                        </div>
+                        <div class="mt-4 flex flex-col gap-1.5">
+                            <button id="btn-challenge-3-easy" onclick="startChallenge(3, 'easy')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Mudah (100 Poin)</button>
+                            <button id="btn-challenge-3-medium" onclick="startChallenge(3, 'medium')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Sedang (200 Poin)</button>
+                            <button id="btn-challenge-3-hard" onclick="startChallenge(3, 'hard')" class="btn-interactive text-xs font-bold py-2 px-3 rounded-lg text-white bg-slate-300 pointer-events-none opacity-60">Sulit (300 Poin)</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Adventure Footer Stats -->
+                <div class="mt-6 bg-slate-900/80 backdrop-blur-md rounded-xl p-3 flex justify-between items-center text-white text-xs relative z-10">
+                    <div>
+                        <span class="text-emerald-300 font-bold"><i class="fa-solid fa-trophy mr-1"></i>Total Skor:</span>
+                        <span id="adventureScore" class="font-mono text-amber-300 font-bold text-sm ml-1">0</span>
+                    </div>
+                    <div>
+                        <span class="text-emerald-300 font-bold"><i class="fa-solid fa-circle-check mr-1"></i>Selesai:</span>
+                        <span id="adventureProgressCount" class="font-bold text-sm ml-1">0/9 Tantangan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t flex justify-between items-center">
+            <p class="text-[11px] text-slate-500"><i class="fa-solid fa-lock mr-1"></i>Selesaikan setiap tantangan secara berurutan untuk membuka level berikutnya!</p>
+            <button onclick="showScreen('dashboard')" class="btn-interactive bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl">Kembali ke Menu</button>
+        </div>
+    </section>
+
+    <!-- SCREEN 6: CHALLENGE PLAY SCREEN -->
+    <section id="screen-challenge-play" class="screen hidden w-full max-w-3xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col justify-between border-4 border-emerald-300 overflow-y-auto max-h-[85vh]">
+        <div>
+            <!-- Header Tantangan -->
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <div>
+                    <span id="activeLevelBadge" class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">Level 1</span>
+                    <span id="activeDifficultyBadge" class="bg-amber-400 text-slate-900 text-xs font-bold px-2.5 py-1 rounded-full ml-1">Mudah</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500 text-xs font-bold">Skor Sesi:</span>
+                    <span id="activeChallengeScore" class="bg-slate-100 text-emerald-700 font-mono font-bold px-3 py-1 rounded-lg">100 Poin</span>
+                </div>
+            </div>
+
+            <!-- Pertanyaan & Area Interaktif -->
+            <div id="challengeWorkArea" class="mt-4">
+                <!-- Content injected dynamically via JavaScript based on active level & challenge -->
+            </div>
+        </div>
+
+        <!-- Tombol Aksi Bawah -->
+        <div class="mt-6 pt-4 border-t flex justify-between items-center">
+            <button onclick="abandonChallenge()" class="btn-interactive bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-4 py-2 rounded-xl text-sm">Menyerah</button>
+            <button id="btn-submit-challenge" onclick="checkChallengeAnswer()" class="btn-interactive bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Kirim Jawaban <i class="fa-solid fa-circle-check ml-1"></i></button>
+        </div>
+    </section>
+
+    <!-- SCREEN 7: ASESMEN SUMATIF (PROYEK KREATIF) -->
+    <section id="screen-asesmen" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col justify-between border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <div>
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 class="title-font text-2xl font-bold text-emerald-700"><i class="fa-solid fa-file-pen mr-2"></i>Asesmen Sumatif: Proyek Menulis Mandiri</h2>
+                <button onclick="showScreen('dashboard')" class="btn-interactive bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl"><i class="fa-solid fa-house"></i></button>
+            </div>
+
+            <!-- Description -->
+            <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-xs md:text-sm text-slate-700 leading-relaxed mb-6">
+                <strong><i class="fa-solid fa-lightbulb text-purple-600"></i> INSTRUKSI PROYEK:</strong>
+                Tuliskan sebuah teks deskripsi utuh beranggotakan tiga struktur wajib (Identifikasi, Deskripsi Bagian, Simpulan) bertema <strong>"Tempat Favorit di Sekolahku"</strong>. Lengkapi setiap kotak struktur di bawah ini dengan sungguh-sungguh untuk mendapat penilaian langsung!
+            </div>
+
+            <!-- Interactive Workspace -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Identifikasi -->
+                <div class="bg-amber-50/50 border border-amber-300 p-4 rounded-xl flex flex-col gap-2">
+                    <label class="font-bold text-sm text-amber-800"><i class="fa-solid fa-map-location mr-1"></i> 1. Bagian Identifikasi</label>
+                    <span class="text-[10px] text-slate-500">Tentukan nama objek, lokasi, sejarah, atau gambaran umum objek.</span>
+                    <textarea id="projectIdentifikasi" rows="4" placeholder="Contoh: Perpustakaan SMP Harapan adalah tempat favoritku. Letaknya di sudut lantai dua..." 
+                              class="w-full text-xs p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-amber-400 font-medium text-slate-700"></textarea>
+                </div>
+
+                <!-- Deskripsi Bagian -->
+                <div class="bg-blue-50/50 border border-blue-300 p-4 rounded-xl flex flex-col gap-2">
+                    <label class="font-bold text-sm text-blue-800"><i class="fa-solid fa-eye mr-1"></i> 2. Deskripsi Bagian</label>
+                    <span class="text-[10px] text-slate-500">Rincikan menggunakan kata pancaindra ( visual, pendengaran, sentuhan ).</span>
+                    <textarea id="projectDeskripsi" rows="4" placeholder="Contoh: Di sana berjejer rapi rak buku kayu berwarna cokelat tua. Ruangan ini ber-AC dingin, sunyi..." 
+                              class="w-full text-xs p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-blue-400 font-medium text-slate-700"></textarea>
+                </div>
+
+                <!-- Simpulan/Kesan -->
+                <div class="bg-emerald-50/50 border border-emerald-300 p-4 rounded-xl flex flex-col gap-2">
+                    <label class="font-bold text-sm text-emerald-800"><i class="fa-solid fa-heart mr-1"></i> 3. Simpulan & Kesan</label>
+                    <span class="text-[10px] text-slate-500">Tulis kesan emosional, manfaat, atau simpulan subjektif milikmu.</span>
+                    <textarea id="projectKesimpulan" rows="4" placeholder="Contoh: Aku sangat senang menghabiskan waktu di perpustakaan. Belajar menjadi sangat nyaman..." 
+                              class="w-full text-xs p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-400 font-medium text-slate-700"></textarea>
+                </div>
+            </div>
+
+            <!-- Rubrik Penilaian Real-time -->
+            <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <h4 class="text-xs font-bold text-slate-700 mb-2">Evaluasi Rubrik Otomatis:</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div id="rubrikIdentifikasi" class="bg-rose-50 text-rose-700 border border-rose-200 p-2 rounded text-center text-[10px] font-bold">Identifikasi: <i class="fa-solid fa-circle-xmark ml-1"></i></div>
+                    <div id="rubrikDeskripsi" class="bg-rose-50 text-rose-700 border border-rose-200 p-2 rounded text-center text-[10px] font-bold">Deskripsi Bagian: <i class="fa-solid fa-circle-xmark ml-1"></i></div>
+                    <div id="rubrikKesimpulan" class="bg-rose-50 text-rose-700 border border-rose-200 p-2 rounded text-center text-[10px] font-bold">Simpulan/Kesan: <i class="fa-solid fa-circle-xmark ml-1"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t flex justify-between items-center">
+            <button onclick="downloadProjectReport()" class="btn-interactive bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2"><i class="fa-solid fa-file-pdf"></i> Ekspor / Cetak PDF</button>
+            <button onclick="saveSumativeProject()" class="btn-interactive bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Kumpulkan Proyek <i class="fa-solid fa-paper-plane ml-1"></i></button>
+        </div>
+    </section>
+
+    <!-- SCREEN 8: TANTANGAN HOTS -->
+    <section id="screen-hots" class="screen hidden w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-col justify-between border-4 border-emerald-200 overflow-y-auto max-h-[85vh]">
+        <div>
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 class="title-font text-2xl font-bold text-rose-700"><i class="fa-solid fa-brain mr-2"></i>Tantangan Kognitif (HOTS)</h2>
+                <button onclick="showScreen('dashboard')" class="btn-interactive bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl"><i class="fa-solid fa-house"></i></button>
+            </div>
+
+            <!-- HOTS Scenario Story -->
+            <div class="bg-rose-50 border border-rose-100 rounded-2xl p-5 mb-5">
+                <div class="flex items-center gap-2.5 mb-2">
+                    <span class="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">KASUS DETEKTIF BAHASA</span>
+                    <h3 class="title-font font-bold text-slate-800 text-base">Menyelamatkan Pamflet Museum Pusaka</h3>
+                </div>
+                <p class="text-xs md:text-sm text-slate-700 leading-relaxed">
+                    Bayangkan kamu terpilih menjadi staf humas muda di Museum Pusaka Nasional. Kepala museum baru saja menyerahkan rancangan draf brosur deskripsi untuk wisatawan asing yang dinilai sangat buruk dan tidak berstruktur. Drafnya tertulis: 
+                    <br><strong class="block mt-2 text-slate-600 bg-white p-3 rounded-lg italic border text-xs">
+                        "Museum ini berisi barang-barang kuno dan senjata perang peninggalan zaman dulu. Sangat luar biasa jika Anda mengunjunginya. Semua senjata diletakkan dalam lemari kaca agar tidak berkarat. Datanglah ramai-ramai."
+                    </strong>
+                    <br>Analisislah, mengapa draf di atas gagal dikategorikan sebagai teks deskripsi yang efektif? Serta tuliskan rancangan perbaikan teks tersebut agar memuat struktur <strong>Identifikasi</strong> dan <strong>Deskripsi Bagian</strong> yang kaya akan detail pancaindra!
+                </p>
+            </div>
+
+            <!-- HOTS Workspace -->
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-slate-700">Lembar Analisis & Teks Perbaikan Uraianmu:</label>
+                <textarea id="hotsAnswerInput" rows="5" placeholder="Tulis analisis kegagalan teks di atas dan berikan draf perbaikan versi kamu..." 
+                          class="w-full text-xs md:text-sm p-4 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-rose-500 font-medium text-slate-700 shadow-inner"></textarea>
+                <div class="flex justify-between text-[11px] text-slate-400">
+                    <span>Minimal 100 karakter untuk hasil analisis optimal.</span>
+                    <span id="hotsCharCounter">0 karakter</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t flex justify-end">
+            <button onclick="submitHotsAnswer()" class="btn-interactive bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-md">Kirim Analisis HOTS <i class="fa-solid fa-brain ml-1"></i></button>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL SYSTEM (No alert replacement) -->
+<div id="feedbackModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+    <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border-4 border-emerald-400 flex flex-col items-center text-center">
+        <div id="modalIcon" class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h3 id="modalTitle" class="title-font font-bold text-xl text-slate-800">Judul Pesan</h3>
+        <p id="modalBody" class="text-xs md:text-sm text-slate-600 mt-2 leading-relaxed">Isi pesan...</p>
+        <button id="modalBtn" onclick="closeModal()" class="btn-interactive mt-6 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm shadow-md">Lanjutkan</button>
+    </div>
+</div>
+
+<!-- FOOTER STATUS BRANDING -->
+<footer class="bg-emerald-950 text-emerald-400 py-2.5 px-6 text-center text-xs border-t border-emerald-900 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-2">
+    <span>© 2026 SIPETA DESKRIPSI - Pembelajaran Interaktif Papan Digital SMP Kelas VII</span>
+    <span class="flex items-center gap-1"><i class="fa-solid fa-feather-pointed"></i> Dirancang oleh Pak Teguh, S.Pd.</span>
+</footer>
+
+<script>
+    // App States
+    const state = {
+        name: '',
+        school: '',
+        currentScreen: 'welcome',
+        score: 0,
+        unlockedLevel: 1, // 1 to 3
+        completedChallenges: {
+            '1_easy': false, '1_medium': false, '1_hard': false,
+            '2_easy': false, '2_medium': false, '2_hard': false,
+            '3_easy': false, '3_medium': false, '3_hard': false,
+        },
+        hotsCompleted: false,
+        projectCompleted: false
+    };
+
+    // Challenge Dataset
+    const challengeDB = {
+        1: {
+            easy: {
+                title: "Hutan Struktur - Level Mudah",
+                instructions: "Hubungkan nama struktur dengan fungsi deskripsinya yang benar di bawah ini!",
+                type: "matching",
+                questions: [
+                    { id: 'q1', text: "Paragraf Identifikasi", options: ["Menggambarkan rincian detail pancaindra", "Menentukan identitas umum objek di awal", "Menyimpulkan kesan pribadi penulis"], correct: 1 },
+                    { id: 'q2', text: "Deskripsi Bagian", options: ["Menggambarkan rincian detail pancaindra", "Menentukan identitas umum objek di awal", "Menyimpulkan kesan pribadi penulis"], correct: 0 },
+                    { id: 'q3', text: "Simpulan / Kesan", options: ["Menggambarkan rincian detail pancaindra", "Menentukan identitas umum objek di awal", "Menyimpulkan kesan pribadi penulis"], correct: 2 }
+                ]
+            },
+            medium: {
+                title: "Hutan Struktur - Level Sedang",
+                instructions: "Pilihlah struktur yang tepat untuk paragraf di bawah ini!",
+                type: "multiple-choice",
+                text: '"Taman Nasional Baluran adalah perwakilan ekosistem hutan spesifik kering di Pulau Jawa. Taman ini berlokasi di wilayah Banyuputih, Situbondo, Jawa Timur."',
+                options: ["Identifikasi", "Deskripsi Bagian", "Simpulan / Kesan"],
+                correct: 0
+            },
+            hard: {
+                title: "Hutan Struktur - Level Sulit",
+                instructions: "Urutkanlah 3 bagian paragraf acak berikut agar menjadi teks deskripsi yang utuh sesuai urutan struktur yang benar!",
+                type: "sorting",
+                paragraphs: [
+                    { id: 'B', text: "Kulit buah durian dipenuhi duri-duri tajam. Di dalamnya, terdapat daging buah berwarna kuning emas bertekstur lembut bagai mentega.", role: "Deskripsi Bagian" },
+                    { id: 'A', text: "Buah durian adalah buah tropis musiman yang terkenal di Indonesia. Buah ini dijuluki sebagai Raja Buah karena keunikannya.", role: "Identifikasi" },
+                    { id: 'C', text: "Sungguh durian adalah rajanya buah nusantara yang cita rasanya tiada bandingannya.", role: "Simpulan" }
+                ],
+                correctOrder: ['A', 'B', 'C']
+            }
+        },
+        2: {
+            easy: {
+                title: "Lembah Kata Sifat - Level Mudah",
+                instructions: "Ketuk semua kata yang termasuk ke dalam KATA SIFAT (Adjektiva) yang sering digunakan dalam teks deskripsi di bawah ini!",
+                type: "word-picker",
+                words: [
+                    { text: "Indah", isAdjective: true },
+                    { text: "Berlari", isAdjective: false },
+                    { text: "Lembut", isAdjective: true },
+                    { text: "Meja", isAdjective: false },
+                    { text: "Sangat", isAdjective: false },
+                    { text: "Hijau", isAdjective: true },
+                    { text: "Membaca", isAdjective: false },
+                    { text: "Bising", isAdjective: true }
+                ]
+            },
+            medium: {
+                title: "Lembah Kata Sifat - Level Sedang",
+                instructions: "Lengkapi kalimat rumpang panca indra berikut dengan pilihan kata yang paling deskriptif!",
+                type: "gap-fill",
+                sentence: "Suara deburan ombak di Pantai Kuta terdengar begitu ______ di telinga, berpadu dengan embusan angin sore yang terasa ______ menyentuh kulit.",
+                options: [
+                    { val: "A", label: "gemuruh - hangat", correct: true },
+                    { val: "B", label: "berisik - biasa saja", correct: false },
+                    { val: "C", label: "sunyi - dingin sekali", correct: false }
+                ]
+            },
+            hard: {
+                title: "Lembah Kata Sifat - Level Sulit",
+                instructions: "Manakah kalimat deskripsi yang menggunakan detail visual yang paling kaya dan konkret?",
+                type: "multiple-choice-visual",
+                options: [
+                    { text: "Ibu memiliki sebuah cincin emas bermata batu berharga yang terlihat sangat bagus sekali di jarinya.", correct: false },
+                    { text: "Cincin emas ibu berkilau keemasan diterpa cahaya lampu, dihiasi batu giok oval hijau tua seukuran biji jagung.", correct: true },
+                    { text: "Ibu memakai perhiasan yang mewah sehingga semua orang memperhatikannya.", correct: false }
+                ]
+            }
+        },
+        3: {
+            easy: {
+                title: "Puncak Deskripsi - Level Mudah",
+                instructions: "Hubungkan topik objek deskripsi dengan cerapan panca indra yang paling dominan digunakan!",
+                type: "matching",
+                questions: [
+                    { id: 's1', text: "Melodi serunai bambu bertiup sayup-sayup", options: ["Indra Penciuman", "Indra Pendengaran", "Indra Penglihatan"], correct: 1 },
+                    { id: 's2', text: "Puncak Gunung Merbabu berselimut awan putih", options: ["Indra Penciuman", "Indra Pendengaran", "Indra Penglihatan"], correct: 2 },
+                    { id: 's3', text: "Harum semerbak wangi bunga mawar di taman", options: ["Indra Penciuman", "Indra Pendengaran", "Indra Penglihatan"], correct: 0 }
+                ]
+            },
+            medium: {
+                title: "Puncak Deskripsi - Level Sedang",
+                instructions: "Isilah bagian yang rumpang di bawah ini agar paragraf simpulan teks deskripsi Kucing Kiko menjadi padu!",
+                type: "gap-fill",
+                sentence: "Kiko benar-benar membawa keceriaan bagi seisi rumah. Kami semua sangat ______ padanya dan berjanji akan selalu ______ Kiko dengan baik sepanjang waktu.",
+                options: [
+                    { val: "A", label: "marah - membiarkan", correct: false },
+                    { val: "B", label: "sayang - merawat", correct: true },
+                    { val: "C", label: "takut - memberi makan", correct: false }
+                ]
+            },
+            hard: {
+                title: "Puncak Deskripsi - Level Sulit",
+                instructions: "Pilihlah susunan teks utuh yang paling memenuhi standar keselarasan kaidah deskripsi SMP Kelas 7!",
+                type: "multiple-choice",
+                text: "Teks yang baik harus memiliki pembuka umum (identifikasi), isi detail fisik/suasana, dan ditutup dengan kesan emosional penulis.",
+                options: [
+                    "Buku tulisku bersampul cokelat tebal. Di dalamnya terdapat coretan pensil. Aku suka menulis di buku itu setiap hari.",
+                    "Aku memiliki buku harian kesayangan. Buku itu bersampul kulit cokelat tua dengan tekstur kasar yang elegan. Di setiap lembar kertasnya yang berbau harum khas kayu pinus, aku menuliskan mimpi-mimpiku. Buku ini bagaikan sahabat terbaik yang selalu setia menyimpan rahasia hidupku.",
+                    "Buku adalah jembatan ilmu yang sangat penting untuk dibaca semua siswa SMP kelas 7."
+                ],
+                correct: 1
+            }
+        }
+    };
+
+    // Active Play state tracking
+    let activeLevel = 1;
+    let activeDifficulty = 'easy';
+
+    function showScreen(screenId) {
+        playSound('click');
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        const targetScreen = document.getElementById(`screen-${screenId}`);
+        if (targetScreen) {
+            targetScreen.classList.remove('hidden');
+        }
+        state.currentScreen = screenId;
+        updateDashboardProgress();
+    }
+
+    function startApp() {
+        const nameInput = document.getElementById('inputName').value.trim();
+        const schoolInput = document.getElementById('inputSchool').value.trim();
+
+        if (!nameInput || !schoolInput) {
+            triggerModal("Identitas Diperlukan", "Silakan isi Nama Lengkap dan Asal Sekolah terlebih dahulu sebelum memulai petualangan!", "rose");
+            playSound('fail');
+            return;
+        }
+
+        state.name = nameInput;
+        state.school = schoolInput;
+
+        // Sync to Header
+        document.getElementById('headerName').innerText = state.name;
+        document.getElementById('headerSchool').innerText = state.school;
+        document.getElementById('userInfoHeader').classList.remove('hidden');
+
+        playSound('success');
+        showScreen('dashboard');
+    }
+
+    function triggerModal(title, text, type = "success") {
+        const modal = document.getElementById('feedbackModal');
+        const iconContainer = document.getElementById('modalIcon');
+        const mTitle = document.getElementById('modalTitle');
+        const mBody = document.getElementById('modalBody');
+        const mBtn = document.getElementById('modalBtn');
+
+        mTitle.innerText = title;
+        mBody.innerText = text;
+
+        if (type === "success") {
+            iconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 bg-emerald-100 text-emerald-600";
+            iconContainer.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            mBtn.className = "btn-interactive mt-6 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm shadow-md";
+        } else if (type === "rose") {
+            iconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 bg-rose-100 text-rose-600";
+            iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            mBtn.className = "btn-interactive mt-6 w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-sm shadow-md";
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        playSound('click');
+        document.getElementById('feedbackModal').classList.add('hidden');
+    }
+
+    function toggleFullscreen() {
+        playSound('click');
+        const doc = window.document;
+        const docEl = doc.documentElement;
+
+        const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+        const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+        const icon = document.getElementById('fullscreenIcon');
+
+        if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+            requestFullScreen.call(docEl);
+            icon.className = "fa-solid fa-compress";
+        } else {
+            cancelFullScreen.call(doc);
+            icon.className = "fa-solid fa-expand";
+        }
+    }
+
+    function switchMateriTab(tabId) {
+        playSound('click');
+        document.querySelectorAll('.materi-tab').forEach(btn => {
+            btn.classList.remove('text-emerald-600', 'border-emerald-500');
+            btn.classList.add('text-slate-500', 'border-transparent');
+        });
+        document.querySelectorAll('.materi-tab-content').forEach(cont => cont.classList.add('hidden'));
+
+        document.getElementById(`tab-${tabId}`).classList.remove('text-slate-500', 'border-transparent');
+        document.getElementById(`tab-${tabId}`).classList.add('text-emerald-600', 'border-emerald-500');
+        document.getElementById(`materi-${tabId}`).classList.remove('hidden');
+    }
+
+    function highlightStructure(structure) {
+        playSound('click');
+        document.getElementById('pembedahFeedbackEmpty').classList.add('hidden');
+        const feedbackActive = document.getElementById('pembedahFeedbackActive');
+        feedbackActive.classList.remove('hidden');
+
+        const badge = document.getElementById('pembedahBadge');
+        const title = document.getElementById('pembedahTitle');
+        const content = document.getElementById('pembedahContent');
+
+        // Reset class borders of visual slicer blocks
+        document.querySelectorAll('.pembedah-block').forEach(b => b.classList.remove('ring-4', 'ring-emerald-400'));
+
+        if (structure === 'identifikasi') {
+            badge.className = "px-2.5 py-1 text-xs font-extrabold rounded-full bg-amber-500 text-white inline-block";
+            badge.innerText = "BAGIAN 1: IDENTIFIKASI";
+            title.innerText = "Pengenalan Kucing Kiko";
+            content.innerText = "Paragraf ini memuat struktur IDENTIFIKASI. Penulis menjelaskan identitas umum objek seperti nama objek (Kiko), jenis ras (persia jantan), asal-usul (hadiah ulang tahun dari ayah), serta lokasinya.";
+        } else if (structure === 'deskripsi') {
+            badge.className = "px-2.5 py-1 text-xs font-extrabold rounded-full bg-blue-500 text-white inline-block";
+            badge.innerText = "BAGIAN 2: DESKRIPSI BAGIAN";
+            title.innerText = "Rincian Fisik Visual Kiko";
+            content.innerText = "Paragraf ini memuat struktur DESKRIPSI BAGIAN. Penulis merinci ciri fisik secara konkret menggunakan pancaindra penglihatan (visual), seperti rincian bulu putih bersih yang lebat sehalus sutra, mata biru jernih, dan telinga yang lincah.";
+        } else if (structure === 'kesimpulan') {
+            badge.className = "px-2.5 py-1 text-xs font-extrabold rounded-full bg-emerald-500 text-white inline-block";
+            badge.innerText = "BAGIAN 3: SIMPULAN / KESAN";
+            title.innerText = "Kesan Pribadi Penulis";
+            content.innerText = "Paragraf ini memuat struktur SIMPULAN/KESAN. Penulis menutup deskripsi dengan menyuarakan perasaan subjektifnya, yaitu rasa syukur, kegembiraan atas kehadiran Kiko, serta kesimpulan bahwa Kiko adalah bagian keluarga paling menggemaskan.";
+        }
+    }
+
+    function updateDashboardProgress() {
+        let completed = 0;
+        const keys = Object.keys(state.completedChallenges);
+        keys.forEach(k => {
+            if (state.completedChallenges[k]) completed++;
+        });
+
+        // Calculate progress percentage
+        const totalTasks = keys.length;
+        let progressPercent = Math.round((completed / totalTasks) * 100);
+        
+        document.getElementById('progressText').innerText = `${progressPercent}%`;
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+        // Update levels locked status graphically
+        updateLevelLockState(completed);
+
+        // Update overall score count UI on Map Screen
+        document.getElementById('adventureScore').innerText = state.score;
+        document.getElementById('adventureProgressCount').innerText = `${completed} / ${totalTasks} Tantangan`;
+    }
+
+    function updateLevelLockState(completedCount) {
+        // Unlock Level 2 if all Level 1 challenges are complete
+        const lvl1Complete = state.completedChallenges['1_easy'] && state.completedChallenges['1_medium'] && state.completedChallenges['1_hard'];
+        const lvl2Complete = state.completedChallenges['2_easy'] && state.completedChallenges['2_medium'] && state.completedChallenges['2_hard'];
+
+        if (lvl1Complete) {
+            state.unlockedLevel = 2;
+            document.getElementById('level-card-2').classList.remove('opacity-70');
+            document.getElementById('level-card-2').classList.add('border-emerald-500/30');
+            document.getElementById('btn-challenge-2-easy').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-2-easy').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+        if (state.completedChallenges['2_easy']) {
+            document.getElementById('btn-challenge-2-medium').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-2-medium').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+        if (state.completedChallenges['2_medium']) {
+            document.getElementById('btn-challenge-2-hard').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-2-hard').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+
+        // Unlock Level 3 if Level 2 is fully complete
+        if (lvl2Complete) {
+            state.unlockedLevel = 3;
+            document.getElementById('level-card-3').classList.remove('opacity-70');
+            document.getElementById('level-card-3').classList.add('border-emerald-500/30');
+            document.getElementById('btn-challenge-3-easy').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-3-easy').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+        if (state.completedChallenges['3_easy']) {
+            document.getElementById('btn-challenge-3-medium').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-3-medium').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+        if (state.completedChallenges['3_medium']) {
+            document.getElementById('btn-challenge-3-hard').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-3-hard').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+
+        // Progression unlocked internally step-by-step
+        if (state.completedChallenges['1_easy']) {
+            document.getElementById('btn-challenge-1-medium').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-1-medium').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+        if (state.completedChallenges['1_medium']) {
+            document.getElementById('btn-challenge-1-hard').classList.remove('bg-slate-300', 'pointer-events-none', 'opacity-60');
+            document.getElementById('btn-challenge-1-hard').classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+        }
+
+        // Star Updates
+        updateLvlStars(1, 'lvl1-stars');
+        updateLvlStars(2, 'lvl2-stars');
+        updateLvlStars(3, 'lvl3-stars');
+    }
+
+    function updateLvlStars(levelNum, elementId) {
+        let stars = 0;
+        if (state.completedChallenges[`${levelNum}_easy`]) stars++;
+        if (state.completedChallenges[`${levelNum}_medium`]) stars++;
+        if (state.completedChallenges[`${levelNum}_hard`]) stars++;
+
+        let starHtml = '';
+        for (let i = 1; i <= 3; i++) {
+            if (i <= stars) {
+                starHtml += '<i class="fa-solid fa-star text-amber-400"></i>';
+            } else {
+                starHtml += '<i class="fa-regular fa-star"></i>';
+            }
+        }
+        document.getElementById(elementId).innerHTML = starHtml;
+    }
+
+    function startChallenge(level, difficulty) {
+        playSound('click');
+        activeLevel = level;
+        activeDifficulty = difficulty;
+
+        // Visual badges
+        document.getElementById('activeLevelBadge').innerText = `Level ${level}`;
+        document.getElementById('activeDifficultyBadge').innerText = difficulty.toUpperCase();
+        
+        let scoreVal = 100;
+        if (difficulty === 'medium') scoreVal = 200;
+        if (difficulty === 'hard') scoreVal = 300;
+        document.getElementById('activeChallengeScore').innerText = `${scoreVal} Poin`;
+
+        const workArea = document.getElementById('challengeWorkArea');
+        workArea.innerHTML = ''; // reset
+
+        const data = challengeDB[level][difficulty];
+
+        // Challenge Instruction Header
+        const header = document.createElement('div');
+        header.className = "mb-4 bg-emerald-50 p-3 rounded-xl border border-emerald-100";
+        header.innerHTML = `<h3 class="font-bold text-slate-800 text-sm md:text-base">${data.title}</h3>
+                            <p class="text-xs text-slate-600 mt-1"><i class="fa-solid fa-circle-info text-emerald-600 mr-1"></i> ${data.instructions}</p>`;
+        workArea.appendChild(header);
+
+        // Render dynamic interface based on challenge type
+        if (data.type === 'matching') {
+            renderMatchingUI(workArea, data);
+        } else if (data.type === 'multiple-choice') {
+            renderMultipleChoiceUI(workArea, data);
+        } else if (data.type === 'sorting') {
+            renderSortingUI(workArea, data);
+        } else if (data.type === 'word-picker') {
+            renderWordPickerUI(workArea, data);
+        } else if (data.type === 'gap-fill') {
+            renderGapFillUI(workArea, data);
+        } else if (data.type === 'multiple-choice-visual') {
+            renderMultipleChoiceVisualUI(workArea, data);
+        }
+
+        showScreen('challenge-play');
+    }
+
+    function abandonChallenge() {
+        playSound('fail');
+        showScreen('petualangan');
+    }
+
+    // Matching Interface
+    function renderMatchingUI(container, data) {
+        const grid = document.createElement('div');
+        grid.className = "space-y-4 mt-2";
+
+        data.questions.forEach((q, idx) => {
+            const item = document.createElement('div');
+            item.className = "bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3";
+            item.innerHTML = `<span class="font-bold text-xs md:text-sm text-slate-700 w-full sm:w-1/3">${q.text}</span>`;
+            
+            // Selection dropdown
+            const select = document.createElement('select');
+            select.id = `matching-ans-${idx}`;
+            select.className = "w-full sm:w-2/3 text-xs p-2.5 rounded-lg border border-slate-300 bg-white font-semibold focus:outline-none focus:border-emerald-500";
+            
+            // Default option
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.text = "-- Hubungkan ke Deskripsi yang tepat --";
+            select.appendChild(defaultOpt);
+
+            q.options.forEach((opt, optIdx) => {
+                const o = document.createElement('option');
+                o.value = optIdx;
+                o.text = opt;
+                select.appendChild(o);
+            });
+
+            item.appendChild(select);
+            grid.appendChild(item);
+        });
+
+        container.appendChild(grid);
+    }
+
+    // Multiple Choice
+    function renderMultipleChoiceUI(container, data) {
+        const mcWrapper = document.createElement('div');
+        mcWrapper.className = "space-y-4 mt-2";
+
+        if (data.text) {
+            const textPanel = document.createElement('div');
+            textPanel.className = "bg-slate-100 p-4 rounded-xl italic text-xs md:text-sm text-slate-700 leading-relaxed border-l-4 border-slate-400 mb-2";
+            textPanel.innerText = data.text;
+            mcWrapper.appendChild(textPanel);
+        }
+
+        const optionsGrid = document.createElement('div');
+        optionsGrid.className = "grid grid-cols-1 gap-3";
+
+        data.options.forEach((opt, idx) => {
+            const optBtn = document.createElement('div');
+            optBtn.onclick = function() {
+                playSound('click');
+                document.querySelectorAll('.mc-option-btn').forEach(b => b.classList.remove('border-emerald-500', 'bg-emerald-50'));
+                optBtn.classList.add('border-emerald-500', 'bg-emerald-50');
+                optBtn.dataset.selected = idx;
+            };
+            optBtn.className = "mc-option-btn cursor-pointer bg-white border-2 border-slate-200 hover:border-emerald-400 p-4 rounded-xl text-xs md:text-sm font-bold text-slate-700 transition flex items-center gap-3";
+            optBtn.innerHTML = `<span class="bg-slate-200 text-slate-800 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs">${String.fromCharCode(65 + idx)}</span> <span class="opt-text">${opt}</span>`;
+            optionsGrid.appendChild(optBtn);
+        });
+
+        mcWrapper.appendChild(optionsGrid);
+        container.appendChild(mcWrapper);
+    }
+
+    // Sorting Elements (Click to re-order interface optimized for Touch Boards)
+    function renderSortingUI(container, data) {
+        const sortWrapper = document.createElement('div');
+        sortWrapper.className = "space-y-4 mt-2";
+        
+        const note = document.createElement('p');
+        note.className = "text-[11px] text-slate-500 italic";
+        note.innerText = "Ketuk kotak di bawah secara berurutan sesuai urutan struktur yang tepat (Paragraf 1 -> 2 -> 3). Kotak terpilih akan mendapatkan nomor urutan.";
+        sortWrapper.appendChild(note);
+
+        const grid = document.createElement('div');
+        grid.className = "grid grid-cols-1 gap-3";
+
+        // Randomize visually for challenge
+        const scrambled = [...data.paragraphs].sort(() => Math.random() - 0.5);
+        
+        scrambled.forEach((p) => {
+            const block = document.createElement('div');
+            block.id = `sort-block-${p.id}`;
+            block.onclick = function() {
+                playSound('click');
+                handleSortClick(block, p.id);
+            };
+            block.className = "sort-block cursor-pointer bg-white border-2 border-slate-200 hover:border-emerald-400 p-4 rounded-xl transition flex justify-between items-center gap-4";
+            block.dataset.orderedValue = ""; // Store ordering number e.g. "1"
+            block.innerHTML = `
+                <div class="flex-grow">
+                    <span class="bg-slate-200 text-slate-700 font-bold text-[10px] px-2 py-0.5 rounded">Paragraf Acak</span>
+                    <p class="text-xs text-slate-700 mt-2 font-medium leading-relaxed">${p.text}</p>
+                </div>
+                <div class="sort-badge w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-extrabold text-base border-2 border-slate-200 shrink-0">
+                    -
+                </div>
+            `;
+            grid.appendChild(block);
+        });
+
+        sortWrapper.appendChild(grid);
+        container.appendChild(sortWrapper);
+    }
+
+    let activeSortOrder = [];
+    function handleSortClick(element, id) {
+        const index = activeSortOrder.indexOf(id);
+        const badge = element.querySelector('.sort-badge');
+
+        if (index > -1) {
+            // Already selected, deselect it
+            activeSortOrder.splice(index, 1);
+            element.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+            badge.innerText = "-";
+            badge.className = "sort-badge w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-extrabold text-base border-2 border-slate-200 shrink-0";
+        } else {
+            // Add selection
+            if (activeSortOrder.length >= 3) {
+                // Max limit reached
+                return;
+            }
+            activeSortOrder.push(id);
+            element.classList.add('border-emerald-500', 'bg-emerald-50/50');
+        }
+
+        // Re-calculate badges values
+        document.querySelectorAll('.sort-block').forEach(block => {
+            const blockId = block.id.replace('sort-block-', '');
+            const activeIdx = activeSortOrder.indexOf(blockId);
+            const blockBadge = block.querySelector('.sort-badge');
+            if (activeIdx > -1) {
+                blockBadge.innerText = activeIdx + 1;
+                blockBadge.className = "sort-badge w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-extrabold text-base border-2 border-emerald-600 shrink-0";
+            } else {
+                blockBadge.innerText = "-";
+                blockBadge.className = "sort-badge w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-extrabold text-base border-2 border-slate-200 shrink-0";
+            }
+        });
+    }
+
+    // Word Picker (Adjectives)
+    function renderWordPickerUI(container, data) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "space-y-4 mt-2";
+
+        const grid = document.createElement('div');
+        grid.className = "grid grid-cols-2 sm:grid-cols-4 gap-3";
+
+        data.words.forEach((w, idx) => {
+            const wordBtn = document.createElement('button');
+            wordBtn.onclick = function() {
+                playSound('click');
+                wordBtn.classList.toggle('bg-amber-100');
+                wordBtn.classList.toggle('border-amber-500');
+                wordBtn.classList.toggle('text-amber-800');
+                wordBtn.classList.toggle('scale-95');
+                wordBtn.dataset.picked = wordBtn.dataset.picked === "true" ? "false" : "true";
+            };
+            wordBtn.dataset.picked = "false";
+            wordBtn.className = "btn-interactive bg-white border-2 border-slate-200 text-slate-700 py-3 px-4 rounded-xl font-bold text-xs md:text-sm text-center transition shadow-sm hover:border-amber-400";
+            wordBtn.innerText = w.text;
+            grid.appendChild(wordBtn);
+        });
+
+        wrapper.appendChild(grid);
+        container.appendChild(wrapper);
+    }
+
+    // Gap Fill
+    function renderGapFillUI(container, data) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "space-y-4 mt-2";
+
+        const sentenceBlock = document.createElement('div');
+        sentenceBlock.className = "bg-slate-50 border border-slate-200 p-5 rounded-xl font-bold text-slate-700 text-sm leading-relaxed text-center shadow-inner";
+        
+        // Highlight gap
+        const highlighted = data.sentence.replace('______', '<span class="px-4 py-1 mx-1 rounded bg-amber-200 border-b-2 border-amber-500 font-mono text-amber-900">. . . . .</span>');
+        sentenceBlock.innerHTML = highlighted;
+        wrapper.appendChild(sentenceBlock);
+
+        const optionsGrid = document.createElement('div');
+        optionsGrid.className = "grid grid-cols-1 sm:grid-cols-3 gap-3";
+
+        data.options.forEach((opt) => {
+            const optBtn = document.createElement('button');
+            optBtn.onclick = function() {
+                playSound('click');
+                document.querySelectorAll('.gap-opt-btn').forEach(b => b.classList.remove('bg-amber-100', 'border-amber-500', 'text-amber-800'));
+                optBtn.classList.add('bg-amber-100', 'border-amber-500', 'text-amber-800');
+                optBtn.dataset.selected = "true";
+                
+                // Live preview in slot
+                sentenceBlock.innerHTML = data.sentence.replace('______', `<span class="px-4 py-1 mx-1 rounded bg-amber-400 border-b-2 border-amber-600 font-bold text-slate-900">${opt.label}</span>`);
+            };
+            optBtn.className = "gap-opt-btn btn-interactive bg-white border-2 border-slate-200 text-slate-700 py-3.5 px-4 rounded-xl font-bold text-xs md:text-sm text-center transition shadow-sm hover:border-amber-400";
+            optBtn.innerText = opt.label;
+            optBtn.dataset.val = opt.val;
+            optBtn.dataset.selected = "false";
+            optionsGrid.appendChild(optBtn);
+        });
+
+        wrapper.appendChild(optionsGrid);
+        container.appendChild(wrapper);
+    }
+
+    // Visual Multiple Choice (With detailed sentences)
+    function renderMultipleChoiceVisualUI(container, data) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "space-y-4 mt-2";
+
+        const optionsGrid = document.createElement('div');
+        optionsGrid.className = "grid grid-cols-1 gap-3";
+
+        data.options.forEach((opt, idx) => {
+            const optBtn = document.createElement('div');
+            optBtn.onclick = function() {
+                playSound('click');
+                document.querySelectorAll('.visual-option-btn').forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
+                optBtn.classList.add('border-blue-500', 'bg-blue-50');
+                optBtn.dataset.selected = idx;
+            };
+            optBtn.className = "visual-option-btn cursor-pointer bg-white border-2 border-slate-200 hover:border-blue-400 p-4 rounded-xl text-xs font-semibold text-slate-700 transition flex items-center gap-3";
+            optBtn.innerHTML = `<span class="bg-blue-200 text-blue-800 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">${idx+1}</span> <p class="text-slate-800">${opt.text}</p>`;
+            optionsGrid.appendChild(optBtn);
+        });
+
+        wrapper.appendChild(optionsGrid);
+        container.appendChild(wrapper);
+    }
+
+    function checkChallengeAnswer() {
+        const data = challengeDB[activeLevel][activeDifficulty];
+        let isCorrect = false;
+
+        if (data.type === 'matching') {
+            let correctCount = 0;
+            data.questions.forEach((q, idx) => {
+                const sel = document.getElementById(`matching-ans-${idx}`);
+                if (sel && parseInt(sel.value) === q.correct) {
+                    correctCount++;
+                }
+            });
+            isCorrect = (correctCount === data.questions.length);
+        } else if (data.type === 'multiple-choice') {
+            let selectedIdx = -1;
+            const selectedBtn = document.querySelector('.mc-option-btn[data-selected]');
+            if (selectedBtn) {
+                selectedIdx = parseInt(selectedBtn.dataset.selected);
+            }
+            isCorrect = (selectedIdx === data.correct);
+        } else if (data.type === 'sorting') {
+            // Check if arrays match
+            isCorrect = (activeSortOrder.length === data.correctOrder.length && 
+                         activeSortOrder.every((val, idx) => val === data.correctOrder[idx]));
+            activeSortOrder = []; // Reset active sort tracker
+        } else if (data.type === 'word-picker') {
+            let matchesAll = true;
+            const buttons = document.querySelectorAll('.btn-interactive[data-picked]');
+            buttons.forEach((b, idx) => {
+                const picked = b.dataset.picked === "true";
+                const isAdj = data.words[idx].isAdjective;
+                if (picked !== isAdj) {
+                    matchesAll = false;
+                }
+            });
+            isCorrect = matchesAll;
+        } else if (data.type === 'gap-fill') {
+            const selectedBtn = document.querySelector('.gap-opt-btn[data-selected="true"]');
+            if (selectedBtn) {
+                const chosenVal = selectedBtn.dataset.val;
+                const correctOption = data.options.find(o => o.correct);
+                isCorrect = (chosenVal === correctOption.val);
+            }
+        } else if (data.type === 'multiple-choice-visual') {
+            let selectedIdx = -1;
+            const selectedBtn = document.querySelector('.visual-option-btn[data-selected]');
+            if (selectedBtn) {
+                selectedIdx = parseInt(selectedBtn.dataset.selected);
+            }
+            const correctIdx = data.options.findIndex(o => o.correct);
+            isCorrect = (selectedIdx === correctIdx);
+        }
+
+        // Give Feedback
+        if (isCorrect) {
+            playSound('success');
+            createConfetti();
+
+            let scoreEarned = 100;
+            if (activeDifficulty === 'medium') scoreEarned = 200;
+            if (activeDifficulty === 'hard') scoreEarned = 300;
+
+            // Only award score if not completed before
+            const key = `${activeLevel}_${activeDifficulty}`;
+            if (!state.completedChallenges[key]) {
+                state.completedChallenges[key] = true;
+                state.score += scoreEarned;
+            }
+
+            triggerModal("Selamat, Jawabanmu Benar!", `Kamu berhasil menyelesaikan tantangan ini dan memenangkan tambahan ${scoreEarned} Poin! Yuk, lanjutkan perjuanganmu.`, "success");
+            showScreen('petualangan');
+        } else {
+            playSound('fail');
+            triggerModal("Yah, Belum Sempurna!", "Jawabanmu kurang tepat atau belum lengkap. Coba teliti strukturnya atau tanyakan ke Pak Teguh!", "rose");
+        }
+    }
+
+    function createConfetti() {
+        const container = document.getElementById('confettiContainer');
+        container.innerHTML = '';
+        const colors = ['#34d399', '#fbbf24', '#3b82f6', '#f43f5e', '#a855f7'];
+
+        for (let i = 0; i < 40; i++) {
+            const div = document.createElement('div');
+            div.className = 'confetti';
+            div.style.left = Math.random() * 100 + 'vw';
+            div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            div.style.transform = `rotate(${Math.random() * 360}deg)`;
+            div.style.animationDelay = Math.random() * 0.5 + 's';
+            div.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+            container.appendChild(div);
+        }
+        setTimeout(() => { container.innerHTML = ''; }, 3000);
+    }
+
+    // Real-time assessment rubrics listeners
+    function checkSummativeDrafts() {
+        const valIdentifikasi = document.getElementById('projectIdentifikasi').value.trim();
+        const valDeskripsi = document.getElementById('projectDeskripsi').value.trim();
+        const valKesimpulan = document.getElementById('projectKesimpulan').value.trim();
+
+        const rubrikId = document.getElementById('rubrikIdentifikasi');
+        const rubrikDes = document.getElementById('rubrikDeskripsi');
+        const rubrikKes = document.getElementById('rubrikKesimpulan');
+
+        // Validation limits
+        if (valIdentifikasi.length > 30) {
+            rubrikId.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 p-2 rounded text-center text-[10px] font-bold";
+            rubrikId.innerHTML = 'Identifikasi: Sempurna <i class="fa-solid fa-circle-check ml-1"></i>';
+        } else {
+            rubrikId.className = "bg-rose-50 text-rose-700 border border-rose-200 p-2 rounded text-center text-[10px] font-bold";
+            rubrikId.innerHTML = 'Identifikasi: Tulis lebih detail <i class="fa-solid fa-circle-xmark ml-1"></i>';
+        }
+
+        if (valDeskripsi.length > 50) {
+            rubrikDes.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 p-2 rounded text-center text-[10px] font-bold";
+            rubrikDes.innerHTML = 'Deskripsi Bagian: Terpenuhi <i class="fa-solid fa-circle-check ml-1"></i>';
+        } else {
+            rubrikDes.className = "bg-rose-50 text-rose-700 border border-rose-200 p-2 rounded text-center text-[10px] font-bold";
+            rubrikDes.innerHTML = 'Deskripsi Bagian: Butuh pancaindra <i class="fa-solid fa-circle-xmark ml-1"></i>';
+        }
+
+        if (valKesimpulan.length > 25) {
+            rubrikKes.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 p-2 rounded text-center text-[10px] font-bold";
+            rubrikKes.innerHTML = 'Simpulan/Kesan: Lengkap <i class="fa-solid fa-circle-check ml-1"></i>';
+        } else {
+            rubrikKes.className = "bg-rose-50 text-rose-700 border border-rose-200 p-2 rounded text-center text-[10px] font-bold";
+            rubrikKes.innerHTML = 'Simpulan/Kesan: Berikan kesanmu <i class="fa-solid fa-circle-xmark ml-1"></i>';
+        }
+    }
+
+    // Attach listeners
+    document.getElementById('projectIdentifikasi').addEventListener('input', checkSummativeDrafts);
+    document.getElementById('projectDeskripsi').addEventListener('input', checkSummativeDrafts);
+    document.getElementById('projectKesimpulan').addEventListener('input', checkSummativeDrafts);
+
+    function saveSumativeProject() {
+        const valIdentifikasi = document.getElementById('projectIdentifikasi').value.trim();
+        const valDeskripsi = document.getElementById('projectDeskripsi').value.trim();
+        const valKesimpulan = document.getElementById('projectKesimpulan').value.trim();
+
+        if (valIdentifikasi.length < 30 || valDeskripsi.length < 50 || valKesimpulan.length < 25) {
+            playSound('fail');
+            triggerModal("Proyek Belum Lengkap!", "Ayo Sobat Bahasa! Lengkapilah setiap bagian struktur tulisan sesuai standar minimal agar mendapatkan apresiasi tertinggi dari Pak Teguh.", "rose");
+            return;
+        }
+
+        playSound('complete');
+        state.projectCompleted = true;
+        createConfetti();
+        state.score += 500; // Large reward for summative assessment completion
+        triggerModal("Luar Biasa, Tulisanmu Sangat Keren!", "Proyek menulis deskripsi mandirimu telah disimpan dan dinilai secara otomatis dengan predikat SANGAT BAIK (A)! Skor bertambah +500 Poin!", "success");
+        showScreen('dashboard');
+    }
+
+    // Export functionality using window printing or beautiful download format
+    function downloadProjectReport() {
+        playSound('click');
+        const name = state.name || "Siswa Baru";
+        const school = state.school || "SMP Pilihan";
+        const valIdentifikasi = document.getElementById('projectIdentifikasi').value.trim();
+        const valDeskripsi = document.getElementById('projectDeskripsi').value.trim();
+        const valKesimpulan = document.getElementById('projectKesimpulan').value.trim();
+
+        if (!valIdentifikasi || !valDeskripsi || !valKesimpulan) {
+            triggerModal("Data Kosong", "Tuliskan draf teks deskripsimu terlebih dahulu sebelum melakukan ekspor!", "rose");
+            return;
+        }
+
+        // Build printable output frame HTML content
+        const outputWindow = window.open('', '_blank');
+        outputWindow.document.write(`
+            <html>
+            <head>
+                <title>Laporan Proyek Teks Deskripsi - ${name}</title>
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                    .header { text-align: center; border-bottom: 3px double #047857; padding-bottom: 20px; }
+                    .meta { margin-top: 15px; font-weight: bold; }
+                    .section-box { margin-top: 25px; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+                    .identifikasi { background-color: #fffbeb; border-left: 5px solid #fbbf24; }
+                    .deskripsi { background-color: #eff6ff; border-left: 5px solid #3b82f6; }
+                    .simpulan { background-color: #ecfdf5; border-left: 5px solid #10b981; }
+                    h3 { margin-top: 0; color: #111827; }
+                    .footer { text-align: center; margin-top: 50px; font-size: 11px; color: #888; border-top: 1px solid #ddd; padding-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>HASIL KARYA DESKRIPSI MANDIRI</h2>
+                    <p>Evaluasi Asesmen Sumatif Bahasa Indonesia Kelas VII</p>
+                    <div class="meta">
+                        Nama: ${name} &nbsp;|&nbsp; Sekolah: ${school}
+                    </div>
+                </div>
+
+                <div class="section-box identifikasi">
+                    <h3>1. Struktur Identifikasi</h3>
+                    <p>${valIdentifikasi}</p>
+                </div>
+
+                <div class="section-box deskripsi">
+                    <h3>2. Struktur Deskripsi Bagian</h3>
+                    <p>${valDeskripsi}</p>
+                </div>
+
+                <div class="section-box simpulan">
+                    <h3>3. Struktur Simpulan & Kesan</h3>
+                    <p>${valKesimpulan}</p>
+                </div>
+
+                <div class="footer">
+                    SIPETA DESKRIPSI - Pembelajaran Interaktif Papan Digital
+                    <br>Diperiksa dan Diakreditasi oleh Pak Teguh, S.Pd.
+                </div>
+                <script>
+                    window.onload = function() { window.print(); }
+                <\/script>
+            </body>
+            </html>
+        `);
+        outputWindow.document.close();
+    }
+
+    const hotsInput = document.getElementById('hotsAnswerInput');
+    hotsInput.addEventListener('input', function() {
+        const count = hotsInput.value.length;
+        document.getElementById('hotsCharCounter').innerText = `${count} karakter`;
+    });
+
+    function submitHotsAnswer() {
+        const text = hotsInput.value.trim();
+        if (text.length < 100) {
+            playSound('fail');
+            triggerModal("Analisis Belum Cukup Rinci", "Harap berikan analisis minimal 100 karakter agar evaluasimu tajam dan mencerminkan tingkat pemikiran HOTS!", "rose");
+            return;
+        }
+
+        playSound('complete');
+        state.hotsCompleted = true;
+        createConfetti();
+        state.score += 400; // Reward for HOTS Uraian Challenge
+        triggerModal("Luar Biasa, Pemikiran Kritis Terdeteksi!", "Kamu sukses mendeteksi kelemahan brosur tersebut dan merevisinya dengan sangat baik. Skor bertambah +400 Poin!", "success");
+        showScreen('dashboard');
+    }
+
+    // Run animation and music setup on windows load
+    window.onload = function() {
+        updateDashboardProgress();
+    }
+</script>
+</body>
+</html>
